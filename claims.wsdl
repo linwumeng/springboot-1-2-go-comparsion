@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="Claim" targetNamespace="urn:ClaimSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="urn:ClaimSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/">
+	<wsdl:types>
+		<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:ClaimSchema">
+			<xsd:element name="ClaimRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="ClaimID" type="xsd:string"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<xsd:element name="ClaimResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Status" type="xsd:string"/>
+						<xsd:element name="ClaimForm" type="wsi:swaRef" xmlns:wsi="http://ws-i.org/profiles/basic/1.1/xsd"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:schema>
+	</wsdl:types>
+
+	<wsdl:message name="ClaimRequest">
+		<wsdl:part name="body" element="tns:ClaimRequest"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="ClaimResponse">
+		<wsdl:part name="body" element="tns:ClaimResponse"></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:portType name="PortType1">
+		<wsdl:operation name="Claim">
+			<wsdl:input message="tns:ClaimRequest"></wsdl:input>
+			<wsdl:output message="tns:ClaimResponse"></wsdl:output>
+		</wsdl:operation>
+	</wsdl:portType>
+
+	<wsdl:binding name="Binding1" type="tns:PortType1">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="Claim">
+			<soap:operation soapAction="urn:Claim" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+
+	<wsdl:service name="Service1">
+		<wsdl:port name="Port1" binding="tns:Binding1">
+			<soap:address location="https://claim.service" />
+		</wsdl:port>
+	</wsdl:service>
+
+</wsdl:definitions>
