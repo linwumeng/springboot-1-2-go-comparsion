@@ -9,6 +9,7 @@ class BootLoadSimulation extends Simulation {
   private val sb1Url = "http://192.168.3.9:8081"
   private val sb2cUrl = "http://192.168.3.9:8082"
   private val sb2hUrl = "http://192.168.3.9:8083"
+  private val goUrl = "http://192.168.3.9:8000"
 
   private val endpoint = "/"
   private val contentType = "application/json"
@@ -27,6 +28,9 @@ class BootLoadSimulation extends Simulation {
     .acceptHeader("application/json;charset=UTF-8")
   private val sb2hHttpConf = http
     .baseURL(sb2hUrl)
+    .acceptHeader("application/json;charset=UTF-8")
+  private val goHttpConf = http
+    .baseURL(goUrl)
     .acceptHeader("application/json;charset=UTF-8")
 
   private val queryStatus = repeat(requestCount) {
@@ -73,9 +77,19 @@ class BootLoadSimulation extends Simulation {
   private val scn4 = scenario("com.lwm.test.scala.BootLoadSimulation4")
     .exec(queryPersons4)
 
+  private val queryPersons5 = repeat(requestCount) {
+    exec(http("query_persons_go")
+      .get(endpoint + "persons")
+      .header("Content-Type", contentType)
+      .check(status.is(200)))
+  }
+  private val scn5 = scenario("com.lwm.test.scala.BootLoadSimulation5")
+    .exec(queryPersons5)
+
   setUp(scn.inject(atOnceUsers(simUsers)).protocols(directHttpConf),
-    scn2.inject(atOnceUsers(simUsers)).protocols(sb1HttpConf),
+//    scn2.inject(atOnceUsers(simUsers)).protocols(sb1HttpConf),
     scn3.inject(atOnceUsers(simUsers)).protocols(sb2cHttpConf),
-    scn4.inject(atOnceUsers(simUsers)).protocols(sb2hHttpConf)
+//    scn4.inject(atOnceUsers(simUsers)).protocols(sb2hHttpConf),
+      scn5.inject(atOnceUsers(simUsers)).protocols(goHttpConf),
   )
 }
