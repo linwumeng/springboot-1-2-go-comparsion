@@ -5,10 +5,10 @@ import io.gatling.http.Predef._
 
 class BootLoadSimulation extends Simulation {
 
-  private val directUrl = "http://localhost:8090"
-  private val sb1Url = "http://localhost:8081"
-  private val sb2cUrl = "http://localhost:8082"
-  private val sb2hUrl = "http://localhost:8083"
+  private val directUrl = "http://192.168.3.9:8090"
+  private val sb1Url = "http://192.168.3.9:8081"
+  private val sb2cUrl = "http://192.168.3.9:8082"
+  private val sb2hUrl = "http://192.168.3.9:8083"
 
   private val endpoint = "/"
   private val contentType = "application/json"
@@ -21,6 +21,12 @@ class BootLoadSimulation extends Simulation {
     .acceptHeader("application/json;charset=UTF-8")
   private val sb1HttpConf = http
     .baseURL(sb1Url)
+    .acceptHeader("application/json;charset=UTF-8")
+  private val sb2cHttpConf = http
+    .baseURL(sb2cUrl)
+    .acceptHeader("application/json;charset=UTF-8")
+  private val sb2hHttpConf = http
+    .baseURL(sb2hUrl)
     .acceptHeader("application/json;charset=UTF-8")
 
   private val queryStatus = repeat(requestCount) {
@@ -36,6 +42,9 @@ class BootLoadSimulation extends Simulation {
       .header("Content-Type", contentType)
       .check(status.is(200)))
   }
+  private val scn = scenario("com.lwm.test.scala.BootLoadSimulation")
+    //    .exec(queryStatus)
+    .exec(queryPersons)
 
   private val queryPersons2 = repeat(requestCount) {
     exec(http("query_persons_sb1")
@@ -43,13 +52,30 @@ class BootLoadSimulation extends Simulation {
       .header("Content-Type", contentType)
       .check(status.is(200)))
   }
-  private val scn = scenario("com.lwm.test.scala.BootLoadSimulation")
-    //    .exec(queryStatus)
-    .exec(queryPersons)
   private val scn2 = scenario("com.lwm.test.scala.BootLoadSimulation2")
-        .exec(queryPersons2)
+    .exec(queryPersons2)
+
+  private val queryPersons3 = repeat(requestCount) {
+    exec(http("query_persons_sbc")
+      .get(endpoint + "persons")
+      .header("Content-Type", contentType)
+      .check(status.is(200)))
+  }
+  private val scn3 = scenario("com.lwm.test.scala.BootLoadSimulation3")
+    .exec(queryPersons3)
+
+  private val queryPersons4 = repeat(requestCount) {
+    exec(http("query_persons_sbh")
+      .get(endpoint + "persons")
+      .header("Content-Type", contentType)
+      .check(status.is(200)))
+  }
+  private val scn4 = scenario("com.lwm.test.scala.BootLoadSimulation4")
+    .exec(queryPersons4)
 
   setUp(scn.inject(atOnceUsers(simUsers)).protocols(directHttpConf),
-    scn2.inject(atOnceUsers(simUsers)).protocols(sb1HttpConf)
+    scn2.inject(atOnceUsers(simUsers)).protocols(sb1HttpConf),
+    scn3.inject(atOnceUsers(simUsers)).protocols(sb2cHttpConf),
+    scn4.inject(atOnceUsers(simUsers)).protocols(sb2hHttpConf)
   )
 }

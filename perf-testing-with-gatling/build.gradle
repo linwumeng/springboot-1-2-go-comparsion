@@ -21,6 +21,7 @@ task loadTest(type: JavaExec) {
 
     classpath = sourceSets.test.runtimeClasspath + configurations.testCompile + configurations.compile
 
+    jvmArgs = ["-Xmx4g"]
     main = "io.gatling.app.Gatling"
     args = ['-s', 'com.lwm.testing.perf.gatling.BootLoadSimulation',             // -- simulation
             '-rf', "${buildDir}/reports/gatling"    //-- results-folder
