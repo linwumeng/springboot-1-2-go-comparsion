@@ -2,37 +2,33 @@ package gateway.controller;
 
 import com.google.common.util.concurrent.RateLimiter;
 import gateway.model.Person;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import org.springframework.web.context.request.async.DeferredResult;
 
-import java.util.concurrent.Callable;
-
-import static org.springframework.http.HttpHeaders.ACCEPT;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 
 @RestController
 public class PersonController {
 
-    private WebClient webClient = WebClient.builder().baseUrl("http://localhost:8090").build();
+    @Autowired
+    private RestTemplateBuilder restTemplateBuilder;
+
     final RateLimiter rateLimiter = RateLimiter.create(100.0);
 
     @GetMapping(value = "/persons", produces = "application/json")
-    public Mono<Flux<Person>> listPersons() throws InterruptedException {
-        return Mono.fromCallable(new Callable<Flux<Person>>() {
-            @Override
-            public Flux<Person> call() throws Exception {
-                rateLimiter.acquire();
-                return webClient.get()
-                        .uri("/persons")
-                        .header(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
-                        .header(ACCEPT, APPLICATION_JSON_UTF8_VALUE)
-                        .exchange()
-                        .flatMapMany(it -> it.bodyToFlux(Person.class));
-            }
+    public DeferredResult<List<Person>> listPersons() {
+        DeferredResult<List<Person>> output = new DeferredResult<>();
+        ForkJoinPool.commonPool().submit(() -> {
+            rateLimiter.acquire();
+            ResponseEntity<List> personList = restTemplateBuilder.build().getForEntity("http://localhost:8090/persons", List.class);
+            output.setResult(personList.getBody());
         });
+
+        return output;
     }
 }

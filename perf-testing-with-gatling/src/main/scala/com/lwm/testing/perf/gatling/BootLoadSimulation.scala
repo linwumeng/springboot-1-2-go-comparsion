@@ -104,10 +104,10 @@ class BootLoadSimulation extends Simulation {
     .exec(queryUsers)
 
   setUp(
-    scn.inject(rampUsers(simUsers) over (30 seconds)).protocols(directHttpConf),
+//    scn.inject(rampUsers(simUsers) over (30 seconds)).protocols(directHttpConf),
 //    scn6.inject(rampUsers(simUsers) over (30 seconds)).protocols(directHttpConf2),
 //    scn2.inject(rampUsers(simUsers) over (30 seconds)).protocols(sb1HttpConf),
-//    scn3.inject(rampUsers(simUsers) over (30 seconds)).protocols(sb2cHttpConf),
+    scn3.inject(rampUsers(simUsers) over (30 seconds)).protocols(sb2cHttpConf),
 //    scn4.inject(rampUsers(simUsers) over (30 seconds)).protocols(sb2hHttpConf),
 //      scn5.inject(rampUsers(simUsers) over (30 seconds)).protocols(goHttpConf),
   )
